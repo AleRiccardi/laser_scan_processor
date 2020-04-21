@@ -1,4 +1,4 @@
-#include "../include/laser_line_extraction/line.h"
+#include "../../include/laser_line_extraction/line.h"
 
 namespace line_extraction
 {

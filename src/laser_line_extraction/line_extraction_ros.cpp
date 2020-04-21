@@ -1,4 +1,4 @@
-#include "../include/laser_line_extraction/line_extraction_ros.h"
+#include "../../include/laser_line_extraction/line_extraction_ros.h"
 #include <cmath>
 #include <ros/console.h>
 
@@ -30,7 +30,7 @@ LineExtractionROS::~LineExtractionROS()
 ///////////////////////////////////////////////////////////////////////////////
 // Run
 ///////////////////////////////////////////////////////////////////////////////
-void LineExtractionROS::run()
+void LineExtractionROS::run(Status &status)
 {
   // Extract the lines
   std::vector<Line> lines;
@@ -39,6 +39,9 @@ void LineExtractionROS::run()
   // Populate message
   laser_scan_processor::LineSegmentList msg;
   populateLineSegListMsg(lines, msg);
+
+  // Update the status
+  status.setLines(lines);
   
   // Publish the lines
   line_publisher_.publish(msg);
@@ -74,7 +77,7 @@ void LineExtractionROS::loadParameters()
   scan_topic_ = scan_topic;
   ROS_DEBUG("scan_topic: %s", scan_topic_.c_str());
 
-  nh_local_.param<bool>("publish_markers", pub_markers, false);
+  nh_local_.param<bool>("publish_markers", pub_markers, true);
   pub_markers_ = pub_markers;
   ROS_DEBUG("publish_markers: %s", pub_markers ? "true" : "false");
 
@@ -153,7 +156,7 @@ void LineExtractionROS::populateMarkerMsg(const std::vector<Line> &lines,
   marker_msg.ns = "line_extraction";
   marker_msg.id = 0;
   marker_msg.type = visualization_msgs::Marker::LINE_LIST;
-  marker_msg.scale.x = 0.1;
+  marker_msg.scale.x = 0.05;
   marker_msg.color.r = 1.0;
   marker_msg.color.g = 0.0;
   marker_msg.color.b = 0.0;

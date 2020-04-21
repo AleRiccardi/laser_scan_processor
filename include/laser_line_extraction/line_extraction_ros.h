@@ -1,6 +1,7 @@
 #ifndef LINE_EXTRACTION_ROS_H
 #define LINE_EXTRACTION_ROS_H
 
+#include <iostream>
 #include <vector>
 #include <string>
 #include <ros/ros.h>
@@ -11,6 +12,7 @@
 #include "laser_scan_processor/LineSegmentList.h"
 #include "line_extraction.h"
 #include "line.h"
+#include "../status.h"
 
 namespace line_extraction
 {
@@ -23,7 +25,7 @@ public:
   LineExtractionROS(ros::NodeHandle&, ros::NodeHandle&);
   ~LineExtractionROS();
   // Running
-  void run();
+  void run(Status &status);
 
 private:
   // ROS

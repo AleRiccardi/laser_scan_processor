@@ -26,22 +26,33 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES line line_extraction line_extraction_ros
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS geometry_msgs message_runtime roscpp sensor_msgs visualization_msgs
 )
 
-add_library(line src/line.cpp)
-target_link_libraries(line ${catkin_LIBRARIES})
+## Declare a C++ library
+add_library(
+  ${PROJECT_NAME}
+   src/status.cpp
+   src/laser_line_extraction/line.cpp
+   src/laser_line_extraction/line_extraction.cpp
+   src/laser_line_extraction/line_extraction_ros.cpp
+   src/laser_door_detection/door_detection.cpp
+   src/laser_door_detection/door_detection_ros.cpp
+)
 
-add_library(line_extraction src/line_extraction.cpp)
-target_link_libraries(line_extraction ${catkin_LIBRARIES})
+target_link_libraries(
+  ${PROJECT_NAME}
+   ${catkin_LIBRARIES}
+)
 
-add_library(line_extraction_ros src/line_extraction_ros.cpp)
-target_link_libraries(line_extraction_ros line line_extraction ${catkin_LIBRARIES})
-add_dependencies(line_extraction_ros laser_scan_processor_generate_messages_cpp)
+add_dependencies(
+  ${PROJECT_NAME}
+   ${catkin_EXPORTED_TARGETS}
+)
 
-add_executable(line_extraction_node src/line_extraction_node.cpp)
-target_link_libraries(line_extraction_node line_extraction_ros ${catkin_LIBRARIES})
+add_executable(processor_node src/processor_node.cpp)
+target_link_libraries(processor_node ${PROJECT_NAME})
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(include ${EIGEN3_INCLUDE_DIRS})
