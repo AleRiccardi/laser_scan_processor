@@ -37,6 +37,7 @@ add_library(
    src/laser_line_extraction/line.cpp
    src/laser_line_extraction/line_extraction.cpp
    src/laser_line_extraction/line_extraction_ros.cpp
+   src/laser_door_detection/door.cpp
    src/laser_door_detection/door_detection.cpp
    src/laser_door_detection/door_detection_ros.cpp
 )

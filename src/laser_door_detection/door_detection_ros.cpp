@@ -1,6 +1,5 @@
 #include "../../include/laser_door_detection/door_detection_ros.h"
 
-
 namespace door_detection
 {
 
@@ -23,7 +22,7 @@ void DoorDetectionROS::run(Status &status)
 {
   door_detection_.setLines(status.getLines());
 
-  std::vector<std::array<double, 4>> doors;
+  std::vector<Door> doors;
   door_detection_.detectDoors(doors);
 
     // Also publish markers if parameter publish_markers is set to true
@@ -61,7 +60,7 @@ void DoorDetectionROS::loadParameters()
   ROS_DEBUG("*************************************");
 }
 
-void DoorDetectionROS::populateMarkerMsg(const std::vector<std::array<double, 4>> &doors,
+void DoorDetectionROS::populateMarkerMsg(const std::vector<Door> &doors,
                                          visualization_msgs::Marker &marker_msg)
 {
   marker_msg.ns = "door_extraction";
@@ -72,16 +71,16 @@ void DoorDetectionROS::populateMarkerMsg(const std::vector<std::array<double, 4>
   marker_msg.color.g = 1.0;
   marker_msg.color.b = 0.0;
   marker_msg.color.a = 1.0;
-  for (unsigned int i =0 ; i < doors.size(); i++)
+  for (std::vector<Door>::const_iterator cit = doors.begin(); cit != doors.end(); ++cit)
   {
     geometry_msgs::Point p_start;
-    p_start.x = doors[i][0];
-    p_start.y = doors[i][1];
+    p_start.x = cit->getStart()[0];
+    p_start.y = cit->getStart()[1];
     p_start.z = 0;
     marker_msg.points.push_back(p_start);
     geometry_msgs::Point p_end;
-    p_end.x = doors[i][2];
-    p_end.y = doors[i][3];
+    p_end.x = cit->getEnd()[0];
+    p_end.y = cit->getEnd()[1];
     p_end.z = 0;
     marker_msg.points.push_back(p_end);
   }

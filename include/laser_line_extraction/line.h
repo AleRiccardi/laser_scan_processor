@@ -4,6 +4,7 @@
 #include <vector>
 #include <boost/array.hpp>
 #include "utilities.h"
+#include "boost/array.hpp"
 
 namespace line_extraction
 {

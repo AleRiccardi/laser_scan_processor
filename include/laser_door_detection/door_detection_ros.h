@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include <array>
+#include <boost/array.hpp>
 #include <string>
 #include <cmath>
 #include <bits/floatn-common.h>
@@ -14,6 +14,7 @@
 #include <ros/console.h>
 
 #include "../status.h"
+#include "door.h"
 #include "door_detection.h"
 #include "laser_scan_processor/LineSegment.h"
 #include "laser_scan_processor/LineSegmentList.h"
@@ -46,7 +47,7 @@ private:
   DoorDetection door_detection_;
 
   void lineWallCallback(const laser_scan_processor::LineSegmentList::ConstPtr &scan_msg);
-  void populateMarkerMsg(const std::vector<std::array<double, 4>> &doors,
+  void populateMarkerMsg(const std::vector<Door> &doors,
                          visualization_msgs::Marker &marker_msg);
 };
 

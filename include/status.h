@@ -1,7 +1,7 @@
 #ifndef STATUS_H
 #define STATUS_H
 
-#include <array>
+#include <boost/array.hpp>
 #include <vector>
 #include "laser_line_extraction/line.h"
 
@@ -12,10 +12,10 @@ public:
     ~Status();
 
     void setLines(std::vector<line_extraction::Line> &lines);
-    std::vector<std::array<double, 4>> getLines();
+    std::vector<line_extraction::Line> getLines();
     
 private:
-      std::vector<std::array<double, 4>> lines_;
+      std::vector<line_extraction::Line> lines_;
 };
 
 
