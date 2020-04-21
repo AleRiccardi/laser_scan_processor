@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <array>
+
 #include "laser_scan_processor/LineSegment.h"
 
 namespace door_detection

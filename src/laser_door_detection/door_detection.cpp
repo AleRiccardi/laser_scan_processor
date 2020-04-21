@@ -5,6 +5,8 @@
 #include <fstream>
 #include <math.h>
 
+#include "ros/console.h"
+
 std::vector<int> sort2idx(std::vector<double> vect)
 {
     std::size_t n(0);
@@ -12,7 +14,7 @@ std::vector<int> sort2idx(std::vector<double> vect)
     std::generate(std::begin(idx), std::end(idx), [&] { return n++; });
     std::sort(std::begin(idx),
               std::end(idx),
-              [&](int i1, int i2) { return x[i1] < x[i2]; });
+              [&](int i1, int i2) { return vect[i1] < vect[i2]; });
     return idx;
 }
 
@@ -46,7 +48,7 @@ void DoorDetection::detectDoors(std::vector<std::array<double, 4>> &doors)
                 continue;
 
             std::vector<double> dists;
-            std::vector<std::array<double, 4>> doors;
+            std::vector<std::array<double, 4>> tmp_doors;
             std::vector<std::array<std::array<double, 4>, 2>> walls_of_doors;
 
             for (unsigned k = 0; k < 4; k += 2)
@@ -55,39 +57,47 @@ void DoorDetection::detectDoors(std::vector<std::array<double, 4>> &doors)
                 {
                     double dist = euclideanDist(lines_[i][k], lines_[j][l], lines_[i][k + 1], lines_[j][l + 1]);
 
-                    // Possible door detected
-                    if (0.8 < dist && dist < 1)
-                    {
-                        dists.push_back(dist);
-                        doors.push_back({lines_[i][k], lines_[i][k + 1], lines_[j][l], lines_[j][l + 1]});
-                        walls_of_doors.push_back({lines_[i], lines_[j]});
-                    }
+                    dists.push_back(dist);
+                    tmp_doors.push_back({lines_[i][k], lines_[i][k + 1], lines_[j][l], lines_[j][l + 1]});
+                    walls_of_doors.push_back({lines_[i], lines_[j]});
                 }
             }
 
             int count = 0;
-            std::vector<std::array<double, 4>> no_door_walls;
+            std::array<double, 4> no_door_points = {-1};
             std::vector<int> idx = sort2idx(dists);
-            for (unsigned int k = 0; k < dists.size(); i++)
+            //std::vector<int> idx = {0,1,2,3};
+            for (unsigned int k = 0; k < idx.size(); k++)
             {
                 // Max num of doors given by two walls < 2
                 if (count >= 2)
                     break;
-                // Check not possible doors
-                if (no_door_walls.size() ==2 && (no_door_idx[0] == k || no_door_idx[1] == l))
-                    break;
 
-                // If the distance between two walls is less than the first threshold, then
-                // there is no chance to have any door between one of these two points.
-                if (dists[idx[k]] < 0.8)
+                // Check not possible doors
+                if (no_door_points[0] != -1)
                 {
-                    no_door_walls.push_back(walls_of_doors[idx[k]]);
+                    bool first = (no_door_points[0] == tmp_doors[idx[k]][0] && no_door_points[1] == tmp_doors[idx[k]][1]);
+                    bool second = (no_door_points[2] == tmp_doors[idx[k]][2] && no_door_points[3] == tmp_doors[idx[k]][3]);
+                    if (first || second)
+                        continue;
+                }
+
+                // If the distance between two extremities of two walls is less than a threshold, then
+                // there is no chance to have any door between one of these two points of the walls.
+                if (dists[idx[k]] < 0.8)
+                    // saving the walls' points
+                    no_door_points = tmp_doors[idx[k]];
+
+                // Possible door detected
+                if (0.8 < dists[idx[k]] && dists[idx[k]] < 1)
+                {
+                    doors_.push_back(tmp_doors[idx[k]]);
+                    count++;
                 }
             }
         }
     }
-}
-doors = doors_;
+    doors = doors_;
 } // namespace door_detection
 
 void DoorDetection::filterLines()
