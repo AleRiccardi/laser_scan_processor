@@ -34,6 +34,10 @@ public:
   void loadParameters();
 
 private:
+  void lineWallCallback(const laser_scan_processor::LineSegmentList::ConstPtr &scan_msg);
+  void populateMarkerMsg(const std::vector<Door> &doors,
+                         visualization_msgs::Marker &marker_msg);
+
   // ROS
   ros::NodeHandle nh_;
   ros::NodeHandle nh_local_;
@@ -47,10 +51,6 @@ private:
   bool pub_markers_door_;
   // Line extraction
   DoorDetection door_detection_;
-
-  void lineWallCallback(const laser_scan_processor::LineSegmentList::ConstPtr &scan_msg);
-  void populateMarkerMsg(const std::vector<Door> &doors,
-                         visualization_msgs::Marker &marker_msg);
 };
 
 } // namespace door_detection

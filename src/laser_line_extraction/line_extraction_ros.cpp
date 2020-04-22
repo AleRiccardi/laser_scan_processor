@@ -69,7 +69,7 @@ void LineExtractionROS::loadParameters()
 {
   
   ROS_DEBUG("*************************************");
-  ROS_DEBUG("PARAMETERS:");
+  ROS_DEBUG("LINE PARAMETERS:");
 
   // Parameters used by this node
   
@@ -134,7 +134,7 @@ void LineExtractionROS::loadParameters()
   line_extraction_.setMinLinePoints(static_cast<unsigned int>(min_line_points));
   ROS_DEBUG("min_line_points: %d", min_line_points);
 
-  ROS_DEBUG("*************************************");
+  //ROS_DEBUG("*************************************");
 }
 
 /**

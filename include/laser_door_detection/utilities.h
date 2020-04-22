@@ -12,6 +12,17 @@
 namespace door_detection
 {
 
+struct Params
+{
+  double min_line_door_length;
+  double min_door_width;
+  double max_door_width;
+  int max_allowed_inliers;
+  double min_allowed_angle;
+  double max_allowed_angle;
+};
+
+
 /**
  * Compute the euclidean distance between two points.
  */

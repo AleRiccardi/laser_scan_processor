@@ -1,5 +1,7 @@
 <launch>
   <node name="processor_node" pkg="laser_scan_processor" type="processor_node" respawn="true" output="screen">
+    
+    <!-- Lines extraction -->
     <param name="~debug" value="true" />
     <param name="~frequency" value="30.0" />
     <param name="~frame_id" value="laser" />
@@ -15,9 +17,18 @@
     <param name="~min_split_dist" value="0.07" />
     <param name="~outlier_dist" value="0.2" />
     <param name="~min_line_points" value="10" />
-
+    
+    <!-- Doors detection -->
     <param name="~frame_door_id" value="laser" />
     <param name="~publish_markers_door" value="true" />
+    <param name="~min_line_door_length" value="0.5" />
+    <param name="~min_door_width" value="0.7" />
+    <param name="~max_door_width" value="1.05" />
+    <param name="~max_allowed_inliers" value="2" />
+    <param name="~min_allowed_angle" value="40" />
+    <param name="~max_allowed_angle" value="200" />
+
+    
   </node>
 
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find laser_scan_processor)/data/default.rviz" />

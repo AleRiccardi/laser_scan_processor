@@ -56,8 +56,7 @@ std::vector<line_extraction::Line> DoorDetection::filterLines()
     for (unsigned int i = 0; i < lines_->size(); i++)
     {
         // Filter small lines
-        // TODO: set as parameter
-        if (door_detection::euclideanDist(lines_->at(i).getStart(), lines_->at(i).getEnd()) > 0.5)
+        if (door_detection::euclideanDist(lines_->at(i).getStart(), lines_->at(i).getEnd()) > params_.min_line_door_length)
             tmp_lines.push_back(lines_->at(i));
     }
     return tmp_lines;
@@ -115,7 +114,7 @@ void DoorDetection::extractDoors()
 
                 // Possible Door Detected
                 // TODO: Set param for thresholds
-                if (0.7 < doors[k].getWidth() && doors[k].getWidth() < 1.05)
+                if (params_.min_door_width < doors[k].getWidth() && doors[k].getWidth() < params_.max_door_width)
                 {
                     doors_.push_back(doors[k]);
                     count++;
@@ -147,7 +146,7 @@ void DoorDetection::filterDoorsInliers()
 
         // Filter out the door if more than
         // two inline point were detected.
-        if (count < 2)
+        if (count < params_.max_allowed_inliers)
             tmp_doors.push_back(doors_[i]);
     }
     doors_ = tmp_doors;
@@ -165,15 +164,44 @@ void DoorDetection::filterDoorsAngles()
         // Get the angle of the first and second wall that generated the door
         double ang1 = angleFromEndpoints(doors_[i].getLine1().getStart(), doors_[i].getLine1().getEnd());
         double ang2 = angleFromEndpoints(doors_[i].getLine2().getStart(), doors_[i].getLine2().getEnd());
-        // Compute the angles diff and convert to degree 
-        double ang_diff = (ang1 - ang2) * (180/M_PI);
+        // Compute the angles diff and convert to degree
+        double ang_diff = (ang1 - ang2) * (180 / M_PI);
 
         // Filter out doors with wrong walls angle
-        if (30 <= ang_diff && ang_diff <= 200)
+        if (params_.min_allowed_angle <= ang_diff && ang_diff <= params_.max_allowed_angle)
             tmp_doors.push_back(doors_[i]);
     }
 
     doors_ = tmp_doors;
+}
+
+/**
+ * Set Parameters.
+ * ---------------
+ */
+void DoorDetection::setMinLineDoorLength(double value)
+{
+    params_.min_line_door_length = value;
+}
+void DoorDetection::setMinDoorWidth(double value)
+{
+    params_.min_door_width = value;
+}
+void DoorDetection::setMaxDoorWidth(double value)
+{
+    params_.max_door_width = value;
+}
+void DoorDetection::setMaxAllowedInliers(int value)
+{
+    params_.max_allowed_inliers = value;
+}
+void DoorDetection::setMinAllowedAngle(double value)
+{
+    params_.min_allowed_angle = value;
+}
+void DoorDetection::setMaxAllowedAngle(double value)
+{
+    params_.max_allowed_angle = value;
 }
 
 } // namespace door_detection

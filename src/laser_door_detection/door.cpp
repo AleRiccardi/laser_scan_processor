@@ -77,7 +77,6 @@ const line_extraction::Line &Door::getLine2()
 
 /**
  * Dot product between two point.
- * TODO: to move.
  */
 const double dotPoints(boost::array<double, 2> x1, boost::array<double, 2> x2)
 {
