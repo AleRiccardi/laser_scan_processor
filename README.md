@@ -4,7 +4,7 @@ Laser Scan Processor is a [Robot Operating System (ROS)](http://www.ros.org) pac
 * Door detection
 Here an example of the project in action:
 
-![Laser line extraction](data/laser_door_processor.gif)
+![Laser line extraction](data/line_door_processor.gif)
 
 ## Usage
 ```
