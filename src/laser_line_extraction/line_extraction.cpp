@@ -7,9 +7,9 @@
 namespace line_extraction
 {
 
-// ##############################
-// Constructor / destructor
-// ##############################
+/**
+ * LineExtraction constroctour.
+ */
 LineExtraction::LineExtraction(Status &status)
 {
   c_data_ = status.getCachedData();
@@ -17,13 +17,16 @@ LineExtraction::LineExtraction(Status &status)
   params_ = status.getParamsLine();
 }
 
+/**
+ * LineExtraction constroctour.
+ */
 LineExtraction::~LineExtraction()
 {
 }
 
-// ##############################
-// Main run function
-// ##############################
+/**
+ * Main function for line extraction
+ */
 void LineExtraction::extractLines(std::vector<Line>& lines) 
 {
   // Resets
@@ -59,9 +62,10 @@ void LineExtraction::extractLines(std::vector<Line>& lines)
   lines = lines_;
 }
 
-// ##############################
-// Parameter setting
-// ##############################
+/**
+ * Parameter setting
+ * -----------------
+ */
 void LineExtraction::setBearingVariance(double value)
 {
   params_->bearing_var = value;
@@ -112,9 +116,10 @@ void LineExtraction::setOutlierDist(double value)
   params_->outlier_dist = value;
 }
 
-// ##############################
-// Utility methods
-// ##############################
+/**
+ * Utility methods
+ * ---------------
+ */
 double LineExtraction::chiSquared(const Eigen::Vector2d &dL, const Eigen::Matrix2d &P_1,
                                   const Eigen::Matrix2d &P_2)
 {
@@ -127,9 +132,10 @@ double LineExtraction::distBetweenPoints(unsigned int index_1, unsigned int inde
               pow(r_data_->ys[index_1] - r_data_->ys[index_2], 2));
 }
 
-// ##############################
-// Filtering points
-// ##############################
+/**
+ * Filtering points
+ * ----------------
+ */
 void LineExtraction::filterClosePoints()
 {
   std::vector<unsigned int> output;
@@ -198,9 +204,10 @@ void LineExtraction::filterOutlierPoints()
   filtered_indices_ = output;
 }
 
-// ##############################
-// Filtering and merging lines
-// ##############################
+/**
+ * Filtering and merging lines
+ * ---------------------------
+ */
 void LineExtraction::filterLines()
 {
   std::vector<Line> output;
@@ -266,9 +273,10 @@ void LineExtraction::mergeLines()
   lines_ = merged_lines;
 }
 
-// ##############################
-// Splitting points into lines
-// ##############################
+/**
+ * Splitting points into lines
+ * ---------------------------
+ */
 void LineExtraction::split(const std::vector<unsigned int>& indices)
 {
   // Don't split if only a single point (only occurs when orphaned by gap)

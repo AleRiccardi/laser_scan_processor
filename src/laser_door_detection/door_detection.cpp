@@ -11,8 +11,8 @@ namespace door_detection
 {
 
 /**
- * 
- */ 
+ * DoorDetection constroctour.
+ */
 DoorDetection::DoorDetection(Status &status)
 {
     c_data_ = status.getCachedData();
@@ -22,15 +22,19 @@ DoorDetection::DoorDetection(Status &status)
 }
 
 /**
- * 
- */ 
+ * DoorDetection destructour.
+ */
 DoorDetection::~DoorDetection()
 {
+    c_data_.reset();
+    r_data_.reset();
+    lines_.reset();
+    params_line_.reset();
 }
 
 /**
- * 
- */ 
+ * Main function called for door detection.
+ */
 void DoorDetection::detectDoors(std::vector<Door> &doors)
 {
     doors_.clear();
@@ -43,8 +47,8 @@ void DoorDetection::detectDoors(std::vector<Door> &doors)
 }
 
 /**
- * 
- */ 
+ * Filter out lines not allows lines.
+ */
 std::vector<line_extraction::Line> DoorDetection::filterLines()
 {
     std::vector<line_extraction::Line> tmp_lines;
@@ -60,8 +64,8 @@ std::vector<line_extraction::Line> DoorDetection::filterLines()
 }
 
 /**
- * 
- */ 
+ * Extract doors from lines.
+ */
 void DoorDetection::extractDoors()
 {
     std::vector<line_extraction::Line> filtered_lines = filterLines();
@@ -81,12 +85,13 @@ void DoorDetection::extractDoors()
             Door door4(filtered_lines[i].getEnd(), filtered_lines[j].getEnd(), filtered_lines[i], filtered_lines[j]);
             std::vector<Door> doors = {door1, door2, door3, door4};
 
-            // Filter Doors by width
-            // ---------------------
             int count = 0;
             boost::array<boost::array<double, 2>, 2> close_points;
+            // Sort doors by their width
             std::sort(doors.begin(), doors.end());
 
+            // Filter Doors by width
+            // ---------------------
             for (unsigned int k = 0; k < doors.size(); k++)
             {
                 // No more than two doors
@@ -121,10 +126,10 @@ void DoorDetection::extractDoors()
 }
 
 /**
- * Filter out doors that have inliers points.
- * This will help to remove fake doors detected 
- * along walls.
- */ 
+ * Filter out doors that have inliers points and keep doors
+ * with a gap between the walls. This will help to remove 
+ * fake doors detected along walls.
+ */
 void DoorDetection::filterDoorsInliers()
 {
     std::vector<Door> tmp_doors;
@@ -139,19 +144,36 @@ void DoorDetection::filterDoorsInliers()
             if (doors_[i].isInlier(point))
                 count++;
         }
-        
+
         // Filter out the door if more than
         // two inline point were detected.
-        if (count < 2){
+        if (count < 2)
             tmp_doors.push_back(doors_[i]);
-        }
     }
     doors_ = tmp_doors;
 }
 
+/**
+ * Filter out doors that are generated with a 
+ * not allowed angle between the two walls.
+ */
 void DoorDetection::filterDoorsAngles()
 {
-    return;
+    std::vector<Door> tmp_doors;
+    for (unsigned int i = 0; i < doors_.size(); i++)
+    {
+        // Get the angle of the first and second wall that generated the door
+        double ang1 = angleFromEndpoints(doors_[i].getLine1().getStart(), doors_[i].getLine1().getEnd());
+        double ang2 = angleFromEndpoints(doors_[i].getLine2().getStart(), doors_[i].getLine2().getEnd());
+        // Compute the angles diff and convert to degree 
+        double ang_diff = (ang1 - ang2) * (180/M_PI);
+
+        // Filter out doors with wrong walls angle
+        if (30 <= ang_diff && ang_diff <= 200)
+            tmp_doors.push_back(doors_[i]);
+    }
+
+    doors_ = tmp_doors;
 }
 
 } // namespace door_detection

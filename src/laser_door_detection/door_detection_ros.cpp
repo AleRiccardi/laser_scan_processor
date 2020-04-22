@@ -3,6 +3,9 @@
 namespace door_detection
 {
 
+/**
+ * DoorDetectionROS constroctour.
+ */
 DoorDetectionROS::DoorDetectionROS(ros::NodeHandle &nh, ros::NodeHandle &nh_local, Status &status)
     : nh_(nh), nh_local_(nh_local), door_detection_(status)
 {
@@ -16,11 +19,17 @@ DoorDetectionROS::DoorDetectionROS(ros::NodeHandle &nh, ros::NodeHandle &nh_loca
   }
 }
 
+/**
+ * DoorDetectionROS destroctour.
+ */
 DoorDetectionROS::~DoorDetectionROS()
 {
   status_.reset();
 }
 
+/**
+ * Run function.
+ */
 void DoorDetectionROS::run()
 {
   std::vector<Door> doors;
@@ -36,6 +45,9 @@ void DoorDetectionROS::run()
   }
 }
 
+/**
+ * Load ROS parameters.
+ */
 void DoorDetectionROS::loadParameters()
 {
 
@@ -62,6 +74,9 @@ void DoorDetectionROS::loadParameters()
   ROS_DEBUG("*************************************");
 }
 
+/**
+ * Populate a marker message with all the doors.
+ */
 void DoorDetectionROS::populateMarkerMsg(const std::vector<Door> &doors,
                                          visualization_msgs::Marker &marker_msg)
 {

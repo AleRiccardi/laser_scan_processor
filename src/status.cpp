@@ -1,6 +1,10 @@
 #include "../include/status.h"
 #include "ros/console.h"
 
+
+/**
+ * Status constoctour.
+ */
 Status::Status(/* args */)
     : c_data_(new line_extraction::CachedData()),
       r_data_(new line_extraction::RangeData()),
@@ -10,10 +14,16 @@ Status::Status(/* args */)
 {
 }
 
+/**
+ * Status destroctour.
+ */
 Status::~Status()
 {
 }
 
+/**
+ * Set detected lines.
+ */
 void Status::setLines(std::vector<line_extraction::Line> &lines)
 {
     lines_->clear();
@@ -23,6 +33,9 @@ void Status::setLines(std::vector<line_extraction::Line> &lines)
     }
 }
 
+/**
+ * Set detected doors.
+ */
 void Status::setDoors(std::vector<door_detection::Door> &doors)
 {
     doors_->clear();
@@ -32,6 +45,10 @@ void Status::setDoors(std::vector<door_detection::Door> &doors)
     }
 }
 
+
+/**
+ * Set laser beams cache data.
+ */
 void Status::setCachedData(const std::vector<double> &bearings,
                            const std::vector<double> &cos_bearings,
                            const std::vector<double> &sin_bearings,
@@ -43,6 +60,9 @@ void Status::setCachedData(const std::vector<double> &bearings,
     c_data_->indices = indices;
 }
 
+/**
+ * Set laser beam range data.
+ */
 void Status::setRangeData(const std::vector<double> &ranges)
 {
     r_data_->ranges = ranges;
@@ -56,6 +76,10 @@ void Status::setRangeData(const std::vector<double> &ranges)
     }
 }
 
+/**
+ * Get functions.
+ * --------------
+ */
 std::shared_ptr<line_extraction::Params> Status::getParamsLine()
 {
     return params_line_;

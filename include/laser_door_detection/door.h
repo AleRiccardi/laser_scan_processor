@@ -15,13 +15,17 @@ namespace door_detection
 class Door
 {
 public:
-    Door(const boost::array<double, 2> start, const boost::array<double, 2> end, line_extraction::Line &line1, line_extraction::Line &line2);
+    Door(const boost::array<double, 2> start, const boost::array<double, 2> end,
+         line_extraction::Line &line1, line_extraction::Line &line2);
     ~Door();
 
     double getAngle();
     double getWidth();
     const boost::array<double, 2> &getStart() const;
     const boost::array<double, 2> &getEnd() const;
+    const line_extraction::Line &getLine1();
+    const line_extraction::Line &getLine2();
+
     bool isInlier(boost::array<double, 2> point);
 
     // Override operator <
