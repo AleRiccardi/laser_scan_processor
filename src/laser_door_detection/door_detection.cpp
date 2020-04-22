@@ -15,6 +15,7 @@ DoorDetection::DoorDetection(Status &status)
     c_data_ = status.getCachedData();
     r_data_ = status.getRangeData();
     lines_ = status.getLines();
+    params_line_ = status.getParamsLine();
 }
 
 DoorDetection::~DoorDetection()
@@ -95,7 +96,7 @@ void DoorDetection::extractDoors()
                 // Possible Door Detected
                 // -----------------------
                 // TODO: Set param for thresholds
-                if (0.8 < doors[k].getWidth() && doors[k].getWidth() < 1)
+                if (0.7 < doors[k].getWidth() && doors[k].getWidth() < 1.05)
                 {
                     doors_.push_back(doors[k]);
                     count++;
@@ -107,7 +108,21 @@ void DoorDetection::extractDoors()
 
 void DoorDetection::filterDoorsWithInliners()
 {
-    return;
+    for (unsigned int i = 0; i < doors_.size(); i++)
+    {
+        unsigned int count = 0;
+        for (std::vector<unsigned int>::const_iterator cit = c_data_->indices.begin();
+             cit != c_data_->indices.end(); ++cit)
+        {
+            boost::array<double, 2> point = {r_data_->xs[*cit], r_data_->ys[*cit]};
+            // TODO: set param
+            if (doors_[i].isPointInline(point, 0.2))
+            {
+                count++;
+            }
+        }
+        ROS_DEBUG("Door %d, num inliners: %d", i, count);
+    }
 }
 
 void DoorDetection::filterDoorsWrongAngleLines()

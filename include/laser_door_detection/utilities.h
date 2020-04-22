@@ -7,6 +7,8 @@
 #include <math.h>
 #include <boost/array.hpp>
 
+#include "../laser_line_extraction/utilities.h"
+
 namespace door_detection
 {
 
@@ -14,6 +16,20 @@ namespace door_detection
 inline double euclideanDist(boost::array<double, 2> p1, boost::array<double, 2> p2)
 {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
+}
+
+inline double angleFromEndpoints(boost::array<double, 2> p1, boost::array<double, 2> p2)
+{
+  double slope, angle;
+  if (fabs(p2[0] - p1[0]) > 1e-9)
+  {
+    slope = (p2[1] - p1[1]) / (p2[0] - p1[0]);
+    return line_extraction::pi_to_pi(atan(slope) + M_PI / 2);
+  }
+  else
+  {
+    return 0.0;
+  }
 }
 
 } // namespace door_detection

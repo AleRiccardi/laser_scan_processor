@@ -14,7 +14,7 @@ LineExtraction::LineExtraction(Status &status)
 {
   c_data_ = status.getCachedData();
   r_data_ = status.getRangeData();
-
+  params_ = status.getParamsLine();
 }
 
 LineExtraction::~LineExtraction()
@@ -35,7 +35,7 @@ void LineExtraction::extractLines(std::vector<Line>& lines)
   filterOutlierPoints();
 
   // Return no lines if not enough points left
-  if (filtered_indices_.size() <= std::max(params_.min_line_points, static_cast<unsigned int>(3)))
+  if (filtered_indices_.size() <= std::max(params_->min_line_points, static_cast<unsigned int>(3)))
   {
     return;
   }
@@ -64,52 +64,52 @@ void LineExtraction::extractLines(std::vector<Line>& lines)
 // ##############################
 void LineExtraction::setBearingVariance(double value)
 {
-  params_.bearing_var = value;
+  params_->bearing_var = value;
 }
 
 void LineExtraction::setRangeVariance(double value)
 {
-  params_.range_var = value;
+  params_->range_var = value;
 }
 
 void LineExtraction::setLeastSqAngleThresh(double value)
 {
-  params_.least_sq_angle_thresh = value;
+  params_->least_sq_angle_thresh = value;
 }
 
 void LineExtraction::setLeastSqRadiusThresh(double value)
 {
-  params_.least_sq_radius_thresh = value;
+  params_->least_sq_radius_thresh = value;
 }
 
 void LineExtraction::setMaxLineGap(double value)
 {
-  params_.max_line_gap = value;
+  params_->max_line_gap = value;
 }
 
 void LineExtraction::setMinLineLength(double value)
 {
-  params_.min_line_length = value;
+  params_->min_line_length = value;
 }
 
 void LineExtraction::setMinLinePoints(unsigned int value)
 {
-  params_.min_line_points = value;
+  params_->min_line_points = value;
 }
 
 void LineExtraction::setMinRange(double value)
 {
-  params_.min_range = value;
+  params_->min_range = value;
 }
 
 void LineExtraction::setMinSplitDist(double value)
 {
-  params_.min_split_dist = value;
+  params_->min_split_dist = value;
 }
 
 void LineExtraction::setOutlierDist(double value)
 {
-  params_.outlier_dist = value;
+  params_->outlier_dist = value;
 }
 
 // ##############################
@@ -136,7 +136,7 @@ void LineExtraction::filterClosePoints()
   for (std::vector<unsigned int>::const_iterator cit = filtered_indices_.begin(); 
        cit != filtered_indices_.end(); ++cit)
   {
-    if (r_data_->ranges[*cit] >= params_.min_range)
+    if (r_data_->ranges[*cit] >= params_->min_range)
     {
       output.push_back(*cit);
     }
@@ -177,16 +177,16 @@ void LineExtraction::filterOutlierPoints()
 
     // Check if point is an outlier
 
-    if (fabs(r_data_->ranges[p_i] - r_data_->ranges[p_j]) > params_.outlier_dist &&
-        fabs(r_data_->ranges[p_i] - r_data_->ranges[p_k]) > params_.outlier_dist) 
+    if (fabs(r_data_->ranges[p_i] - r_data_->ranges[p_j]) > params_->outlier_dist &&
+        fabs(r_data_->ranges[p_i] - r_data_->ranges[p_k]) > params_->outlier_dist) 
     {
       // Check if it is close to line connecting its neighbours
       std::vector<unsigned int> line_indices;
       line_indices.push_back(p_j);
       line_indices.push_back(p_k);
-      Line line(*c_data_, *r_data_, params_, line_indices);
+      Line line(*c_data_, *r_data_, *params_, line_indices);
       line.endpointFit();
-      if (line.distToPoint(p_i) > params_.min_split_dist)
+      if (line.distToPoint(p_i) > params_->min_split_dist)
       {
         continue; // point is an outlier
       }
@@ -206,7 +206,7 @@ void LineExtraction::filterLines()
   std::vector<Line> output;
   for (std::vector<Line>::const_iterator cit = lines_.begin(); cit != lines_.end(); ++cit)
   {
-    if (cit->length() >= params_.min_line_length && cit->numPoints() >= params_.min_line_points)
+    if (cit->length() >= params_->min_line_length && cit->numPoints() >= params_->min_line_points)
     {
       output.push_back(*cit);
     }
@@ -277,7 +277,7 @@ void LineExtraction::split(const std::vector<unsigned int>& indices)
     return;
   }
 
-  Line line(*c_data_, *r_data_, params_, indices);
+  Line line(*c_data_, *r_data_, *params_, indices);
   line.endpointFit();
   double dist_max = 0;
   double gap_max = 0;
@@ -316,13 +316,13 @@ void LineExtraction::split(const std::vector<unsigned int>& indices)
   }
 
   // Check if line meets requirements or should be split
-  if (dist_max < params_.min_split_dist && gap_max < params_.max_line_gap)
+  if (dist_max < params_->min_split_dist && gap_max < params_->max_line_gap)
   {
     lines_.push_back(line);
   }
   else
   {
-    int i_split = dist_max >= params_.min_split_dist ? i_max : i_gap;
+    int i_split = dist_max >= params_->min_split_dist ? i_max : i_gap;
     std::vector<unsigned int> first_split(&indices[0], &indices[i_split - 1]);
     std::vector<unsigned int> second_split(&indices[i_split], &indices.back());
     split(first_split);

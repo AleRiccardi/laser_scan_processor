@@ -31,6 +31,8 @@ private:
     std::shared_ptr<line_extraction::CachedData> c_data_;
     std::shared_ptr<line_extraction::RangeData> r_data_;
     std::shared_ptr<std::vector<line_extraction::Line>> lines_;
+    std::shared_ptr<line_extraction::Params> params_line_;
+
     std::vector<Door> doors_;
 };
 

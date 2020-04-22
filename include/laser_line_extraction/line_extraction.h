@@ -38,7 +38,7 @@ private:
   // Data structures
   std::shared_ptr<CachedData> c_data_;
   std::shared_ptr<RangeData> r_data_;
-  Params params_;
+  std::shared_ptr<Params> params_;
   // Indices after filtering
   std::vector<unsigned int> filtered_indices_;
   // Line data

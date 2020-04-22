@@ -15,6 +15,7 @@ public:
     Status();
     ~Status();
 
+    void setParamsLine(line_extraction::Params &params);
     void setLines(std::vector<line_extraction::Line> &lines);
     void setDoors(std::vector<door_detection::Door> &doors);
 
@@ -24,11 +25,14 @@ public:
                        const std::vector<unsigned int> &indices);
     void setRangeData(const std::vector<double> &ranges);
 
+    std::shared_ptr<line_extraction::Params> getParamsLine();
     std::shared_ptr<line_extraction::CachedData> getCachedData();
     std::shared_ptr<line_extraction::RangeData> getRangeData();
     std::shared_ptr<std::vector<line_extraction::Line>> getLines();
     std::shared_ptr<std::vector<door_detection::Door>> getDoors();
+
 private:
+    std::shared_ptr<line_extraction::Params> params_line_;
     std::shared_ptr<line_extraction::CachedData> c_data_;
     std::shared_ptr<line_extraction::RangeData> r_data_;
     std::shared_ptr<std::vector<line_extraction::Line>> lines_;

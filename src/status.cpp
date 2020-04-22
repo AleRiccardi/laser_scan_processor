@@ -5,6 +5,7 @@ Status::Status(/* args */)
     : c_data_(new line_extraction::CachedData()),
       r_data_(new line_extraction::RangeData()),
       lines_(new std::vector<line_extraction::Line>()),
+      params_line_(new line_extraction::Params()),
       doors_(new std::vector<door_detection::Door>())
 {
 }
@@ -53,6 +54,11 @@ void Status::setRangeData(const std::vector<double> &ranges)
         r_data_->xs.push_back(c_data_->cos_bearings[*cit] * ranges[*cit]);
         r_data_->ys.push_back(c_data_->sin_bearings[*cit] * ranges[*cit]);
     }
+}
+
+std::shared_ptr<line_extraction::Params> Status::getParamsLine()
+{
+    return params_line_;
 }
 
 std::shared_ptr<line_extraction::CachedData> Status::getCachedData()
