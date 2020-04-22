@@ -3,9 +3,11 @@
 namespace door_detection
 {
 
-DoorDetectionROS::DoorDetectionROS(ros::NodeHandle &nh, ros::NodeHandle &nh_local) : nh_(nh),
-                                                                                     nh_local_(nh_local)
+DoorDetectionROS::DoorDetectionROS(ros::NodeHandle &nh, ros::NodeHandle &nh_local, Status &status)
+    : nh_(nh), nh_local_(nh_local), door_detection_(status)
 {
+  status_ = std::make_shared<Status>(status);
+
   loadParameters();
   line_door_pub_ = nh_.advertise<laser_scan_processor::LineSegmentList>("door_segments", 1);
   if (pub_markers_door_)
@@ -16,16 +18,16 @@ DoorDetectionROS::DoorDetectionROS(ros::NodeHandle &nh, ros::NodeHandle &nh_loca
 
 DoorDetectionROS::~DoorDetectionROS()
 {
+  status_.reset();
 }
 
-void DoorDetectionROS::run(Status &status)
+void DoorDetectionROS::run()
 {
-  door_detection_.setLines(status.getLines());
-
   std::vector<Door> doors;
   door_detection_.detectDoors(doors);
 
-    // Also publish markers if parameter publish_markers is set to true
+  status_->setDoors(doors);
+  // Also publish markers if parameter publish_markers is set to true
   if (pub_markers_door_)
   {
     visualization_msgs::Marker marker_msg;

@@ -10,57 +10,58 @@
 namespace door_detection
 {
 
-DoorDetection::DoorDetection()
+DoorDetection::DoorDetection(Status &status)
 {
+    c_data_ = status.getCachedData();
+    r_data_ = status.getRangeData();
+    lines_ = status.getLines();
 }
 
 DoorDetection::~DoorDetection()
 {
 }
 
-void DoorDetection::setLines(std::vector<line_extraction::Line> lines)
-{
-    lines_ = lines;
-}
-
 void DoorDetection::detectDoors(std::vector<Door> &doors)
 {
     doors_.clear();
-    
-    filterLines();
+
     extractDoors();
+    filterDoorsWithInliners();
+    filterDoorsWrongAngleLines();
 
     doors = doors_;
 }
 
-void DoorDetection::filterLines()
+std::vector<line_extraction::Line> DoorDetection::filterLines()
 {
     std::vector<line_extraction::Line> tmp_lines;
 
-    for (unsigned int i = 0; i < lines_.size(); i++)
+    for (unsigned int i = 0; i < lines_->size(); i++)
     {
         // Filter small lines
         // TODO: set as parameter
-        if (door_detection::euclideanDist(lines_[i].getStart(), lines_[i].getEnd()) > 0.5)
-            tmp_lines.push_back(lines_[i]);
+        if (door_detection::euclideanDist(lines_->at(i).getStart(), lines_->at(i).getEnd()) > 0.5)
+            tmp_lines.push_back(lines_->at(i));
     }
-    lines_ = tmp_lines;
+    return tmp_lines;
 }
 
 void DoorDetection::extractDoors()
 {
-    for (unsigned int i = 0; i < lines_.size(); i++)
+    std::vector<line_extraction::Line> filtered_lines = filterLines();
+
+    for (unsigned int i = 0; i < filtered_lines.size(); i++)
     {
-        for (unsigned int j = 0; j < lines_.size(); j++)
+        for (unsigned int j = 0; j < lines_->size(); j++)
         {
             // No doors w/ the same wall
             if (i == j)
                 continue;
 
-            Door door1(lines_[i].getStart(), lines_[j].getStart(), lines_[i], lines_[j]);
-            Door door2(lines_[i].getStart(), lines_[j].getEnd(), lines_[i], lines_[j]);
-            Door door3(lines_[i].getEnd(), lines_[j].getStart(), lines_[i], lines_[j]);
-            Door door4(lines_[i].getEnd(), lines_[j].getEnd(), lines_[i], lines_[j]);
+            Door door1(filtered_lines[i].getStart(), filtered_lines[j].getStart(), filtered_lines[i], filtered_lines[j]);
+            Door door2(filtered_lines[i].getStart(), filtered_lines[j].getEnd(), filtered_lines[i], filtered_lines[j]);
+            Door door3(filtered_lines[i].getEnd(), filtered_lines[j].getStart(), filtered_lines[i], filtered_lines[j]);
+            Door door4(filtered_lines[i].getEnd(), filtered_lines[j].getEnd(), filtered_lines[i], filtered_lines[j]);
             std::vector<Door> doors = {door1, door2, door3, door4};
 
             // Filter Doors from distances
@@ -102,6 +103,16 @@ void DoorDetection::extractDoors()
             }
         }
     }
+}
+
+void DoorDetection::filterDoorsWithInliners()
+{
+    return;
+}
+
+void DoorDetection::filterDoorsWrongAngleLines()
+{
+    return;
 }
 
 } // namespace door_detection

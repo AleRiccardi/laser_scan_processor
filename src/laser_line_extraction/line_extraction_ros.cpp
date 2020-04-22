@@ -6,14 +6,17 @@
 namespace line_extraction
 {
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Constructor / destructor
-///////////////////////////////////////////////////////////////////////////////
-LineExtractionROS::LineExtractionROS(ros::NodeHandle& nh, ros::NodeHandle& nh_local):
+// ##############################
+LineExtractionROS::LineExtractionROS(ros::NodeHandle& nh, ros::NodeHandle& nh_local, Status &status):
   nh_(nh),
   nh_local_(nh_local),
+  line_extraction_(status),
   data_cached_(false)
 {
+  status_ = std::make_shared<Status>(status);
+
   loadParameters();
   line_publisher_ = nh_.advertise<laser_scan_processor::LineSegmentList>("line_segments", 1);
   scan_subscriber_ = nh_.subscribe(scan_topic_, 1, &LineExtractionROS::laserScanCallback, this);
@@ -27,10 +30,10 @@ LineExtractionROS::~LineExtractionROS()
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Run
-///////////////////////////////////////////////////////////////////////////////
-void LineExtractionROS::run(Status &status)
+// ##############################
+void LineExtractionROS::run()
 {
   // Extract the lines
   std::vector<Line> lines;
@@ -41,7 +44,7 @@ void LineExtractionROS::run(Status &status)
   populateLineSegListMsg(lines, msg);
 
   // Update the status
-  status.setLines(lines);
+  status_->setLines(lines);
   
   // Publish the lines
   line_publisher_.publish(msg);
@@ -55,9 +58,9 @@ void LineExtractionROS::run(Status &status)
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Load ROS parameters
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtractionROS::loadParameters()
 {
   
@@ -130,9 +133,9 @@ void LineExtractionROS::loadParameters()
   ROS_DEBUG("*************************************");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Populate messages
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtractionROS::populateLineSegListMsg(const std::vector<Line> &lines,
                                                 laser_scan_processor::LineSegmentList &line_list_msg)
 {
@@ -178,9 +181,9 @@ void LineExtractionROS::populateMarkerMsg(const std::vector<Line> &lines,
   marker_msg.header.stamp = ros::Time::now();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Cache data on first LaserScan message received
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtractionROS::cacheData(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
 {
   std::vector<double> bearings, cos_bearings, sin_bearings;
@@ -196,13 +199,13 @@ void LineExtractionROS::cacheData(const sensor_msgs::LaserScan::ConstPtr &scan_m
     indices.push_back(i);
   }
 
-  line_extraction_.setCachedData(bearings, cos_bearings, sin_bearings, indices);
+  status_->setCachedData(bearings, cos_bearings, sin_bearings, indices);
   ROS_DEBUG("Data has been cached.");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Main LaserScan callback
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtractionROS::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg)
 {
   if (!data_cached_)
@@ -212,7 +215,7 @@ void LineExtractionROS::laserScanCallback(const sensor_msgs::LaserScan::ConstPtr
   }
 
   std::vector<double> scan_ranges_doubles(scan_msg->ranges.begin(), scan_msg->ranges.end());
-  line_extraction_.setRangeData(scan_ranges_doubles);
+  status_->setRangeData(scan_ranges_doubles);
 }
 
 } // namespace line_extraction

@@ -3,10 +3,12 @@
 
 #include <cmath>
 #include <vector>
+#include <memory>
 #include <boost/array.hpp>
 #include <Eigen/Dense>
 #include "utilities.h"
 #include "line.h"
+#include "../status.h"
 
 namespace line_extraction
 {
@@ -16,14 +18,10 @@ class LineExtraction
 
 public:
   // Constructor / destructor
-  LineExtraction();
+  LineExtraction(Status &status);
   ~LineExtraction();
   // Run
   void extractLines(std::vector<Line>&);
-  // Data setting
-  void setCachedData(const std::vector<double>&, const std::vector<double>&,
-                     const std::vector<double>&, const std::vector<unsigned int>&);
-  void setRangeData(const std::vector<double>&);
   // Parameter setting
   void setBearingVariance(double);
   void setRangeVariance(double);
@@ -38,8 +36,8 @@ public:
 
 private:
   // Data structures
-  CachedData c_data_;
-  RangeData r_data_;
+  std::shared_ptr<CachedData> c_data_;
+  std::shared_ptr<RangeData> r_data_;
   Params params_;
   // Indices after filtering
   std::vector<unsigned int> filtered_indices_;

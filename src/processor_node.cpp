@@ -24,13 +24,13 @@ int main(int argc, char **argv)
   ROS_DEBUG("Frequency set to %0.1f Hz", frequency);
 
   Status status;
-  line_extraction::LineExtractionROS line_extractor(nh, nh_local);
-  door_detection::DoorDetectionROS door_detection(nh, nh_local);
+  line_extraction::LineExtractionROS line_extractor(nh, nh_local, status);
+  door_detection::DoorDetectionROS door_detection(nh, nh_local, status);
 
   while (ros::ok())
   {
-    line_extractor.run(status);
-    door_detection.run(status);
+    line_extractor.run();
+    door_detection.run();
 
     ros::spinOnce();
     rate.sleep();

@@ -27,10 +27,10 @@ class DoorDetectionROS
 
 public:
   // Constructor / destructor
-  DoorDetectionROS(ros::NodeHandle &, ros::NodeHandle &);
+  DoorDetectionROS(ros::NodeHandle &, ros::NodeHandle &, Status &status);
   ~DoorDetectionROS();
   // Running
-  void run(Status &status);
+  void run();
   void loadParameters();
 
 private:
@@ -39,6 +39,8 @@ private:
   ros::NodeHandle nh_local_;
   ros::Publisher line_door_pub_;
   ros::Publisher marker_door_pub_;
+
+  std::shared_ptr<Status> status_;
   // Parameters
   std::string frame_door_id_;
   std::string scan_topic_;

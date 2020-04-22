@@ -22,10 +22,10 @@ class LineExtractionROS
 
 public:
   // Constructor / destructor
-  LineExtractionROS(ros::NodeHandle&, ros::NodeHandle&);
+  LineExtractionROS(ros::NodeHandle&, ros::NodeHandle&, Status &status);
   ~LineExtractionROS();
   // Running
-  void run(Status &status);
+  void run();
 
 private:
   // ROS
@@ -34,6 +34,8 @@ private:
   ros::Subscriber scan_subscriber_;
   ros::Publisher line_publisher_;
   ros::Publisher marker_publisher_;
+
+  std::shared_ptr<Status> status_;
   // Parameters
   std::string frame_id_;
   std::string scan_topic_;

@@ -2,28 +2,32 @@
 #include <algorithm>
 #include <Eigen/Dense>
 #include <iostream>
+#include <ros/console.h>
 
 namespace line_extraction
 {
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Constructor / destructor
-///////////////////////////////////////////////////////////////////////////////
-LineExtraction::LineExtraction()
+// ##############################
+LineExtraction::LineExtraction(Status &status)
 {
+  c_data_ = status.getCachedData();
+  r_data_ = status.getRangeData();
+
 }
 
 LineExtraction::~LineExtraction()
 {
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Main run function
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtraction::extractLines(std::vector<Line>& lines) 
 {
   // Resets
-  filtered_indices_ = c_data_.indices;
+  filtered_indices_ = c_data_->indices;
   lines_.clear();
 
   // Filter indices
@@ -55,36 +59,9 @@ void LineExtraction::extractLines(std::vector<Line>& lines)
   lines = lines_;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Data setting
-///////////////////////////////////////////////////////////////////////////////
-void LineExtraction::setCachedData(const std::vector<double>& bearings,
-                                   const std::vector<double>& cos_bearings,
-                                   const std::vector<double>& sin_bearings,
-                                   const std::vector<unsigned int>& indices)
-{
-  c_data_.bearings = bearings;
-  c_data_.cos_bearings = cos_bearings;
-  c_data_.sin_bearings = sin_bearings;
-  c_data_.indices = indices;
-}
-
-void LineExtraction::setRangeData(const std::vector<double>& ranges)
-{
-  r_data_.ranges = ranges;
-  r_data_.xs.clear();
-  r_data_.ys.clear();
-  for (std::vector<unsigned int>::const_iterator cit = c_data_.indices.begin(); 
-       cit != c_data_.indices.end(); ++cit)
-  {
-    r_data_.xs.push_back(c_data_.cos_bearings[*cit] * ranges[*cit]);
-    r_data_.ys.push_back(c_data_.sin_bearings[*cit] * ranges[*cit]);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Parameter setting
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtraction::setBearingVariance(double value)
 {
   params_.bearing_var = value;
@@ -135,9 +112,9 @@ void LineExtraction::setOutlierDist(double value)
   params_.outlier_dist = value;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Utility methods
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 double LineExtraction::chiSquared(const Eigen::Vector2d &dL, const Eigen::Matrix2d &P_1,
                                   const Eigen::Matrix2d &P_2)
 {
@@ -146,20 +123,20 @@ double LineExtraction::chiSquared(const Eigen::Vector2d &dL, const Eigen::Matrix
 
 double LineExtraction::distBetweenPoints(unsigned int index_1, unsigned int index_2)
 {
-  return sqrt(pow(r_data_.xs[index_1] - r_data_.xs[index_2], 2) + 
-              pow(r_data_.ys[index_1] - r_data_.ys[index_2], 2));
+  return sqrt(pow(r_data_->xs[index_1] - r_data_->xs[index_2], 2) + 
+              pow(r_data_->ys[index_1] - r_data_->ys[index_2], 2));
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Filtering points
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtraction::filterClosePoints()
 {
   std::vector<unsigned int> output;
   for (std::vector<unsigned int>::const_iterator cit = filtered_indices_.begin(); 
        cit != filtered_indices_.end(); ++cit)
   {
-    if (r_data_.ranges[*cit] >= params_.min_range)
+    if (r_data_->ranges[*cit] >= params_.min_range)
     {
       output.push_back(*cit);
     }
@@ -200,14 +177,14 @@ void LineExtraction::filterOutlierPoints()
 
     // Check if point is an outlier
 
-    if (fabs(r_data_.ranges[p_i] - r_data_.ranges[p_j]) > params_.outlier_dist &&
-        fabs(r_data_.ranges[p_i] - r_data_.ranges[p_k]) > params_.outlier_dist) 
+    if (fabs(r_data_->ranges[p_i] - r_data_->ranges[p_j]) > params_.outlier_dist &&
+        fabs(r_data_->ranges[p_i] - r_data_->ranges[p_k]) > params_.outlier_dist) 
     {
       // Check if it is close to line connecting its neighbours
       std::vector<unsigned int> line_indices;
       line_indices.push_back(p_j);
       line_indices.push_back(p_k);
-      Line line(c_data_, r_data_, params_, line_indices);
+      Line line(*c_data_, *r_data_, params_, line_indices);
       line.endpointFit();
       if (line.distToPoint(p_i) > params_.min_split_dist)
       {
@@ -221,9 +198,9 @@ void LineExtraction::filterOutlierPoints()
   filtered_indices_ = output;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Filtering and merging lines
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtraction::filterLines()
 {
   std::vector<Line> output;
@@ -289,9 +266,9 @@ void LineExtraction::mergeLines()
   lines_ = merged_lines;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 // Splitting points into lines
-///////////////////////////////////////////////////////////////////////////////
+// ##############################
 void LineExtraction::split(const std::vector<unsigned int>& indices)
 {
   // Don't split if only a single point (only occurs when orphaned by gap)
@@ -300,7 +277,7 @@ void LineExtraction::split(const std::vector<unsigned int>& indices)
     return;
   }
 
-  Line line(c_data_, r_data_, params_, indices);
+  Line line(*c_data_, *r_data_, params_, indices);
   line.endpointFit();
   double dist_max = 0;
   double gap_max = 0;
