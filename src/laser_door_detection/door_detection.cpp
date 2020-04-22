@@ -10,6 +10,9 @@
 namespace door_detection
 {
 
+/**
+ * 
+ */ 
 DoorDetection::DoorDetection(Status &status)
 {
     c_data_ = status.getCachedData();
@@ -18,21 +21,30 @@ DoorDetection::DoorDetection(Status &status)
     params_line_ = status.getParamsLine();
 }
 
+/**
+ * 
+ */ 
 DoorDetection::~DoorDetection()
 {
 }
 
+/**
+ * 
+ */ 
 void DoorDetection::detectDoors(std::vector<Door> &doors)
 {
     doors_.clear();
 
     extractDoors();
-    filterDoorsWithInliners();
-    filterDoorsWrongAngleLines();
+    filterDoorsInliers();
+    filterDoorsAngles();
 
     doors = doors_;
 }
 
+/**
+ * 
+ */ 
 std::vector<line_extraction::Line> DoorDetection::filterLines()
 {
     std::vector<line_extraction::Line> tmp_lines;
@@ -47,6 +59,9 @@ std::vector<line_extraction::Line> DoorDetection::filterLines()
     return tmp_lines;
 }
 
+/**
+ * 
+ */ 
 void DoorDetection::extractDoors()
 {
     std::vector<line_extraction::Line> filtered_lines = filterLines();
@@ -59,31 +74,31 @@ void DoorDetection::extractDoors()
             if (i == j)
                 continue;
 
+            // Create all possible door combinations given two walls
             Door door1(filtered_lines[i].getStart(), filtered_lines[j].getStart(), filtered_lines[i], filtered_lines[j]);
             Door door2(filtered_lines[i].getStart(), filtered_lines[j].getEnd(), filtered_lines[i], filtered_lines[j]);
             Door door3(filtered_lines[i].getEnd(), filtered_lines[j].getStart(), filtered_lines[i], filtered_lines[j]);
             Door door4(filtered_lines[i].getEnd(), filtered_lines[j].getEnd(), filtered_lines[i], filtered_lines[j]);
             std::vector<Door> doors = {door1, door2, door3, door4};
 
-            // Filter Doors from distances
-            // ----------------------------
+            // Filter Doors by width
+            // ---------------------
             int count = 0;
             boost::array<boost::array<double, 2>, 2> close_points;
             std::sort(doors.begin(), doors.end());
 
             for (unsigned int k = 0; k < doors.size(); k++)
             {
-                // Max num of doors given by two walls < 2
+                // No more than two doors
+                // between two walls.
                 if (count >= 2)
                     break;
 
                 // Check Not Possible Doors
-                // ------------------------
                 if (close_points[0] == doors[k].getStart() || close_points[1] == doors[k].getEnd())
                     continue;
 
                 // Detect Not Possible Doors
-                // -------------------------
                 // If the distance between two extremities of two lines is minor of a threshold,
                 // then there is no chance to have any door between one of these two points.
                 if (doors[k].getWidth() < 0.8)
@@ -94,7 +109,6 @@ void DoorDetection::extractDoors()
                 }
 
                 // Possible Door Detected
-                // -----------------------
                 // TODO: Set param for thresholds
                 if (0.7 < doors[k].getWidth() && doors[k].getWidth() < 1.05)
                 {
@@ -106,8 +120,14 @@ void DoorDetection::extractDoors()
     }
 }
 
-void DoorDetection::filterDoorsWithInliners()
+/**
+ * Filter out doors that have inliers points.
+ * This will help to remove fake doors detected 
+ * along walls.
+ */ 
+void DoorDetection::filterDoorsInliers()
 {
+    std::vector<Door> tmp_doors;
     for (unsigned int i = 0; i < doors_.size(); i++)
     {
         unsigned int count = 0;
@@ -115,17 +135,21 @@ void DoorDetection::filterDoorsWithInliners()
              cit != c_data_->indices.end(); ++cit)
         {
             boost::array<double, 2> point = {r_data_->xs[*cit], r_data_->ys[*cit]};
-            // TODO: set param
-            if (doors_[i].isPointInline(point, 0.2))
-            {
+            // Check if the bearing point is inlier the door
+            if (doors_[i].isInlier(point))
                 count++;
-            }
         }
-        ROS_DEBUG("Door %d, num inliners: %d", i, count);
+        
+        // Filter out the door if more than
+        // two inline point were detected.
+        if (count < 2){
+            tmp_doors.push_back(doors_[i]);
+        }
     }
+    doors_ = tmp_doors;
 }
 
-void DoorDetection::filterDoorsWrongAngleLines()
+void DoorDetection::filterDoorsAngles()
 {
     return;
 }

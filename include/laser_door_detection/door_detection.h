@@ -25,8 +25,8 @@ public:
 private:
     std::vector<line_extraction::Line> filterLines();
     void extractDoors();
-    void filterDoorsWithInliners();
-    void filterDoorsWrongAngleLines();
+    void filterDoorsInliers();
+    void filterDoorsAngles();
 
     std::shared_ptr<line_extraction::CachedData> c_data_;
     std::shared_ptr<line_extraction::RangeData> r_data_;

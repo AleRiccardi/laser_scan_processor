@@ -22,7 +22,7 @@ public:
     double getWidth();
     const boost::array<double, 2> &getStart() const;
     const boost::array<double, 2> &getEnd() const;
-    bool isPointInline(boost::array<double, 2> point, double threshold);
+    bool isInlier(boost::array<double, 2> point);
 
     // Override operator <
     bool operator<(const Door &door) const
