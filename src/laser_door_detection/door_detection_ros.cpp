@@ -15,7 +15,7 @@ DoorDetectionROS::DoorDetectionROS(ros::NodeHandle &nh, ros::NodeHandle &nh_loca
   line_door_pub_ = nh_.advertise<laser_scan_processor::LineSegmentList>("door_segments", 1);
   if (pub_markers_door_)
   {
-    marker_door_pub_ = nh_.advertise<visualization_msgs::Marker>("line_door_markers", 1);
+    marker_door_pub_ = nh_.advertise<visualization_msgs::Marker>("door_markers", 1);
   }
 }
 
