@@ -1,9 +1,9 @@
-# Laser_Scan_Processor
+# Laser Scan Processor
 Laser Scan Processor is a [Robot Operating System (ROS)](http://www.ros.org) package able to process information from [LaserScan](http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html) messages. Currently the developed features are:
 * Line extraction [1]
 * Door detection
 
-Here an example of the project in action:
+Here is an example of the project in action:
 
 ![Laser line extraction](data/line_door_processor.gif)
 
